@@ -1,4 +1,14 @@
-module Game exposing (Agent, Board, GameState, Player, Position)
+module Game
+    exposing
+        ( Agent(..)
+        , Board
+        , GameState
+        , Player(..)
+        , Position
+        , newGame
+        , move
+        , boardGetAt
+        )
 
 {-| This module contains the datatypes and logic necessary for actually
 playing the game.
@@ -11,11 +21,11 @@ playing the game.
 
 # Important functions
 
-???
+@docs newGame, move, boardGetAt
 
 -}
 
-import Array exposing (Array, get, set)
+import Array exposing (Array, get, set, repeat)
 import Random
 import Maybe.Extra exposing (join)
 
@@ -27,13 +37,13 @@ is. Conversely, if it is a computer player (eg. Random) we will have to trigger
 a function call or a random number generation etc.
 Currently the possible players are:
 
-  - Human (which triggers no commands)
-  - Random (which chooses totally at random)
+  - HumanAgent (which triggers no commands)
+  - RandomAgent (which chooses totally at random)
 
 -}
 type Agent
-    = Random (Random.Generator Int)
-    | Human
+    = RandomAgent (Random.Generator Int)
+    | HumanAgent
 
 
 {-| Enumeration of the possible players. There are two.
@@ -41,6 +51,18 @@ type Agent
 type Player
     = Player1
     | Player2
+
+
+{-| given a player, return the other one
+-}
+otherPlayer : Player -> Player
+otherPlayer player =
+    case player of
+        Player1 ->
+            Player2
+
+        Player2 ->
+            Player1
 
 
 {-| The board. This is a grid of cells, each of which will take either the
@@ -52,11 +74,18 @@ type alias Board a =
     { cells : Array (Maybe a), size : Int }
 
 
+{-| Get a new empty board
+-}
+emptyBoard : Int -> Board a
+emptyBoard gridSize =
+    { cells = repeat (gridSize * gridSize) Nothing, size = gridSize }
+
+
 {-| Just a grid position. We are viewing our hex grid as a tilted square, so we
 are using 2D coordinates.
 -}
 type alias Position =
-    { x : Int, y : Int }
+    Int
 
 
 {-| Represents the current state of a game. This consists of:
@@ -74,11 +103,15 @@ type alias GameState =
     }
 
 
-{-| Flatten a Position into an array index. Needs to also know the width
+{-| Make a new empty game state, in which it is player1's turn.
 -}
-flattenPosition : Int -> Position -> Int
-flattenPosition size pos =
-    pos.x + pos.y * size
+newGame : Agent -> Agent -> Int -> GameState
+newGame p1 p2 gridSize =
+    { player1 = p1
+    , player2 = p2
+    , board = emptyBoard gridSize
+    , nextTurn = Player1
+    }
 
 
 {-| Get a position on the board. A maybe because it might not be a valid
@@ -86,10 +119,10 @@ position
 -}
 boardGetAt : Board a -> Position -> Maybe a
 boardGetAt board =
-    join << flip get board.cells << flattenPosition board.size
+    join << flip get board.cells
 
 
-inRange : Int -> Int -> Int -> Bool
+inRange : Int -> Int -> Position -> Bool
 inRange max_ min_ num =
     (num >= min_) && (num < max_)
 
@@ -98,7 +131,7 @@ inRange max_ min_ num =
 -}
 positionOnBoard : Board a -> Position -> Bool
 positionOnBoard board pos =
-    if inRange board.size 0 pos.x && inRange board.size 0 pos.y then
+    if inRange (board.size * board.size) 0 pos then
         True
     else
         False
@@ -120,9 +153,18 @@ placeStone player position board =
                 Just
                     { board
                         | cells =
-                            set (flattenPosition board.size position)
-                                (Just player)
-                                board.cells
+                            set position (Just player) board.cells
                     }
             else
                 Nothing
+
+
+{-| Make a move on a board. This is the highest level function that we expect
+to be called by the main controller when stuff happens.
+-}
+move : GameState -> Int -> GameState
+move state pos =
+    { state
+        | board = Maybe.withDefault state.board << placeStone state.nextTurn pos <| state.board
+        , nextTurn = otherPlayer state.nextTurn
+    }

@@ -2,13 +2,12 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
 
 
 -- component import example
 
-import Components.Hello exposing (hello)
 import Components.HexGrid exposing (hexagonGrid)
+import Game
 
 
 -- APP
@@ -24,12 +23,12 @@ main =
 
 
 type alias Model =
-    Int
+    { gameState : Game.GameState }
 
 
 model : Model
 model =
-    0
+    { gameState = Game.newGame Game.HumanAgent Game.HumanAgent 11 }
 
 
 
@@ -38,7 +37,7 @@ model =
 
 type Msg
     = NoOp
-    | Increment
+    | GridClick Int
 
 
 update : Msg -> Model -> Model
@@ -47,20 +46,37 @@ update msg model =
         NoOp ->
             model
 
-        Increment ->
-            model + 1
+        GridClick flatIndex ->
+            { model | gameState = Game.move model.gameState flatIndex }
 
 
 
 -- VIEW
--- Html is defined as: elem [ attribs ][ children ]
--- CSS can be applied via class names or inline style attrib
+
+
+getHexClass : Model -> Int -> String
+getHexClass model flatIndex =
+    let
+        val =
+            Game.boardGetAt model.gameState.board flatIndex
+    in
+        case val of
+            Just player ->
+                case player of
+                    Game.Player1 ->
+                        "hex-filled-player1"
+
+                    Game.Player2 ->
+                        "hex-filled-player2"
+
+            Nothing ->
+                "hex-empty"
 
 
 view : Model -> Html Msg
 view model =
     div [ class "container", style [ ( "margin-top", "30px" ), ( "text-align", "center" ) ] ]
-        [ hexagonGrid
+        [ hexagonGrid 11 GridClick (getHexClass model)
         ]
 
 
