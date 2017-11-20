@@ -31,8 +31,8 @@ then
 	echo "Building site before pushing to master."
 	rm -rf ./docs
 	npm run build
-	mv dist docs
-	if ! git diff-index $(git write-tree) --quiet --
+	mv ./dist ./docs
+	if [[ -z $(git status -s) ]]
 	then
 		git add docs/
 		git commit -m "auto-build site from"$(git rev-parse HEAD)
