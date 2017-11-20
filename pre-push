@@ -32,7 +32,7 @@ then
 	rm -rf ./docs
 	npm run build
 	mv dist docs
-	if ! git diff-index $(git write-tree) --quiet HEAD --
+	if ! git diff-index $(git write-tree) --quiet --
 	then
 		git add docs/
 		git commit -m "auto-build site from"$(git rev-parse HEAD)
