@@ -4,3 +4,8 @@
 // @import '~bootstrap-sass/assets/stylesheets/_bootstrap.scss';
 
 // can add Boostrap overrides, additional Sass/CSS below...
+@import 'hexgrid';
+
+html {
+  background: $global-background;
+}

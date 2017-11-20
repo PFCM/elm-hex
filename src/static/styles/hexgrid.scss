@@ -1,0 +1,23 @@
+@import 'colours';
+
+.hex-empty {
+    transition: 200ms;
+    transition-timing-function: ease-in-out;
+    fill: $base01;
+}
+
+.hex-empty:hover {
+   fill: $base1;
+}
+
+.hex-empty:active {
+   fill: $base02;
+}
+
+.hex-filled-player1 {
+    fill: $player1;
+  }
+
+.hex-filled-player2 {
+    fill: $player2;
+}
