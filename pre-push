@@ -32,8 +32,7 @@ then
 	rm -rf ./docs
 	npm run build
 	mv ./dist ./docs
-	if [[ -z $(git status -s) ]]
-	then
+	if ! [[ -z $(git status -s) ]]; then
 		git add docs/
 		git commit -m "auto-build site from"$(git rev-parse HEAD)
 		echo "Site had changes, so it was rebuilt. Push again."
