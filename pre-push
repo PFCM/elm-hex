@@ -24,6 +24,8 @@ url="$2"
 
 branch_name="$(git symbolic-ref HEAD 2>/dev/null)"
 
+echo "pushing branch "$branch_name
+
 if [ $branch_name == "master" ]
 then
 	echo "Building site before pushing to master."
@@ -32,6 +34,8 @@ then
 	mv dist docs
 	git add docs/
 	git commit -m "auto-build site from"$(git rev-parse HEAD)
+else
+	echo "Not on master, not building site before push."
 fi
 
 exit 0
