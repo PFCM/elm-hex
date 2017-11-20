@@ -5,7 +5,17 @@
 
 // can add Boostrap overrides, additional Sass/CSS below...
 @import 'hexgrid';
+@import 'colours';
 
 html {
   background: $global-background;
+  font: 100% Helvetica, sans-serif;
+}
+
+.player1 {
+  color: $player1;
+}
+
+.player2 {
+  color: $player2;
 }
