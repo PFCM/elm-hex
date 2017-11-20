@@ -26,14 +26,21 @@ branch_name="$(git symbolic-ref HEAD 2>/dev/null)"
 
 echo "pushing branch "$branch_name
 
-if [ $branch_name == "master" ]
+if [ $branch_name == "refs/heads/master" ]
 then
 	echo "Building site before pushing to master."
 	rm -rf ./docs
 	npm run build
 	mv dist docs
-	git add docs/
-	git commit -m "auto-build site from"$(git rev-parse HEAD)
+	if ! git diff-index $(git write-tree) --quiet HEAD --
+	then
+		git add docs/
+		git commit -m "auto-build site from"$(git rev-parse HEAD)
+		echo "Site had changes, so it was rebuilt. Push again."
+		exit 1
+	else
+		echo "No changes to site after rebuild, allowing push."
+	fi
 else
 	echo "Not on master, not building site before push."
 fi
