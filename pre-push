@@ -19,29 +19,31 @@
 # This sample shows how to prevent push of commits where the log message starts
 # with "WIP" (work in progress).
 
+function msg {
+	tput setab 6; tput setaf 7; echo $1; tput sgr0;
+}
+
 remote="$1"
 url="$2"
 
 branch_name="$(git symbolic-ref HEAD 2>/dev/null)"
 
-echo "pushing branch "$branch_name
-
 if [ $branch_name == "refs/heads/master" ]
 then
-	echo "Building site before pushing to master."
+	msg "Building site before pushing to master."
 	rm -rf ./docs
 	npm run build
 	mv ./dist ./docs
 	if ! [[ -z $(git status -s) ]]; then
 		git add docs/
 		git commit -m "auto-build site from"$(git rev-parse HEAD)
-		echo "Site had changes, so it was rebuilt. Push again."
+		msg "Site had changes, so it was rebuilt. Push again."
 		exit 1
 	else
-		echo "No changes to site after rebuild, allowing push."
+		msg "No changes to site after rebuild, allowing push."
 	fi
 else
-	echo "Not on master, not building site before push."
+	msg "Not on master, not building site before push."
 fi
 
 exit 0
