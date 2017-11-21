@@ -28,6 +28,7 @@ playing the game.
 import Array exposing (Array, get, set, repeat)
 import Random
 import Maybe.Extra exposing (join)
+import Tuple exposing (first, second)
 
 
 {-| A supported player. This is used to know how to fetch an action every time
@@ -157,6 +158,64 @@ placeStone player position board =
                     }
             else
                 Nothing
+
+
+{-| Unwrap the position into a row and a column index. Visually this could
+be confusing, but note that we just count right to left and down from the
+top left corner, treating the grid like a square grid that's been a bit
+tipped over.
+-}
+unwrapPosition : Int -> Position -> ( Int, Int )
+unwrapPosition gridSize pos =
+    ( pos % gridSize, pos // gridSize )
+
+
+{-| Wrap a (row, column) index into a Position
+-}
+wrapPosition : Int -> ( Int, Int ) -> Position
+wrapPosition gridSize ( row, col ) =
+    row + col * gridSize
+
+
+{-| Check if a (row, column) index would be inside a square grid
+-}
+inGrid : Int -> ( Int, Int ) -> Bool
+inGrid gridSize ( row, column ) =
+    List.all (inRange 0 gridSize) [ row, column ]
+
+
+{-| Get the neighbours of a position. At most there are 6, because hexagon.
+Needs to know the size of the grid so it knows when to wrap.
+-}
+getNeighbours : Int -> Position -> List Position
+getNeighbours gridSize position =
+    let
+        -- unwrap the position because it's easier
+        ( row, col ) =
+            unwrapPosition gridSize position
+    in
+        [ ( -1, 0 ), ( 0, -1 ), ( -1, 1 ), ( 0, 1 ), ( 1, 0 ), ( 1, -1 ) ]
+            |> List.map (\a -> ( first a + row, second a + col ))
+            |> List.filter (inGrid gridSize)
+            |> List.map (wrapPosition gridSize)
+
+
+connectedComponent : Position -> Board a -> List Position
+connectedComponent pos board =
+    []
+
+
+{-| Checks if a game is over. If it is returns Just the winner, otherwise
+Nothing. The algorithm for this is pretty simple:
+
+  - Find all connected components on the board
+  - For each component:
+      - see if it has at least one position at each end
+
+-}
+winner : GameState -> Maybe Player
+winner game =
+    Nothing
 
 
 {-| Make a move on a board. This is the highest level function that we expect

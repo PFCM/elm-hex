@@ -16,7 +16,7 @@ hexagonCorner i =
         angle =
             degrees (60 * (toFloat i) + 30)
     in
-        ( 10 + 10 * cos angle, 10 + 10 * sin angle )
+        ( 10 + 7 * cos angle, 10 + 7 * sin angle )
 
 
 hexagonPoints : List ( Float, Float )
@@ -44,7 +44,7 @@ makeHexagon : (Int -> msg) -> Int -> (Int -> String) -> Int -> Html msg
 makeHexagon clickFn gridSize clsFn num =
     let
         size =
-            10
+            7
 
         width =
             (sqrt 3) * size

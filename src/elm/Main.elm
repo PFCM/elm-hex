@@ -107,7 +107,7 @@ view : Model -> Html Msg
 view model =
     div [ class "container", style [ ( "margin-top", "30px" ), ( "text-align", "center" ) ] ]
         [ turnBox model
-        , hexagonGrid 5 GridClick (getHexClass model)
+        , hexagonGrid 11 GridClick (getHexClass model)
         ]
 
 
