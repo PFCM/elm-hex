@@ -31,6 +31,7 @@ import Random
 import Maybe.Extra as ME exposing (join, isJust)
 import Tuple exposing (first, second)
 import Set exposing (Set)
+import Debug
 import GraphSearch
 
 
@@ -127,7 +128,7 @@ boardGetAt board =
 
 
 inRange : Int -> Int -> Position -> Bool
-inRange max_ min_ num =
+inRange min_ max_ num =
     (num >= min_) && (num < max_)
 
 
@@ -135,7 +136,7 @@ inRange max_ min_ num =
 -}
 positionOnBoard : Board a -> Position -> Bool
 positionOnBoard board pos =
-    if inRange (board.size * board.size) 0 pos then
+    if inRange 0 (board.size * board.size) pos then
         True
     else
         False
@@ -244,7 +245,12 @@ componentFold board pos ( visited, components ) =
         ( newvis, comp ) =
             connectedComponent visited board pos
     in
-        ( newvis, comp :: components )
+        case comp of
+            [] ->
+                ( newvis, components )
+
+            component ->
+                ( newvis, component :: components )
 
 
 splitIndex : Player -> ( Int, Int ) -> Int
@@ -290,6 +296,7 @@ winner game =
         |> List.filter (isJust << boardGetAt game.board)
         |> List.foldl (componentFold game.board) ( Set.empty, [] )
         |> second
+        |> Debug.log "components"
         |> List.filterMap (winningComponent game.board)
         |> List.head
 
