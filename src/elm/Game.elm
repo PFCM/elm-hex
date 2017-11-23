@@ -31,7 +31,6 @@ import Random
 import Maybe.Extra as ME exposing (join, isJust)
 import Tuple exposing (first, second)
 import Set exposing (Set)
-import Debug
 import GraphSearch
 
 
@@ -296,7 +295,6 @@ winner game =
         |> List.filter (isJust << boardGetAt game.board)
         |> List.foldl (componentFold game.board) ( Set.empty, [] )
         |> second
-        |> Debug.log "components"
         |> List.filterMap (winningComponent game.board)
         |> List.head
 
