@@ -95,12 +95,20 @@ playerClass player =
 
 turnBox : Model -> Html msg
 turnBox model =
-    div [ class "turn-box" ]
-        [ div [ class << playerClass <| model.gameState.nextTurn ]
-            [ text ((playerName model.gameState.nextTurn) ++ "'s ")
-            ]
-        , text "turn."
-        ]
+    case Game.winner model.gameState of
+        Nothing ->
+            div [ class "turn-box" ]
+                [ div [ class << playerClass <| model.gameState.nextTurn ]
+                    [ text ((playerName model.gameState.nextTurn) ++ "'s ")
+                    ]
+                , text "turn."
+                ]
+
+        Just winner ->
+            div [ class "turn-box" ]
+                [ div [ class << playerClass <| winner ]
+                    [ text ((playerName winner) ++ " wins!") ]
+                ]
 
 
 view : Model -> Html Msg

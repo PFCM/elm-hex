@@ -1,4 +1,4 @@
-module GraphSearch exposing (dfs)
+module GraphSearch exposing (dfs, SearchResult, Neighbourhood)
 
 {-| Minimal set of graph search algorithms, designed to be as representation
 agnostic as possible. Leads to some functions with a large number of arguments.
@@ -51,6 +51,6 @@ dfsFold neighbours =
                         ( newvis, newpath ) =
                             dfs (Set.insert val visited) neighbours val
                     in
-                        ( newvis, path ++ newpath )
+                        ( newvis, path ++ [ val ] ++ newpath )
     in
         foldInner

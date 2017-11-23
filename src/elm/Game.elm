@@ -8,6 +8,7 @@ module Game
         , newGame
         , move
         , boardGetAt
+        , winner
         )
 
 {-| This module contains the datatypes and logic necessary for actually
@@ -21,14 +22,16 @@ playing the game.
 
 # Important functions
 
-@docs newGame, move, boardGetAt
+@docs newGame, move, boardGetAt, winner
 
 -}
 
-import Array exposing (Array, get, set, repeat)
+import Array exposing (Array, get, set)
 import Random
-import Maybe.Extra exposing (join)
+import Maybe.Extra as ME exposing (join, isJust)
 import Tuple exposing (first, second)
+import Set exposing (Set)
+import GraphSearch
 
 
 {-| A supported player. This is used to know how to fetch an action every time
@@ -79,7 +82,7 @@ type alias Board a =
 -}
 emptyBoard : Int -> Board a
 emptyBoard gridSize =
-    { cells = repeat (gridSize * gridSize) Nothing, size = gridSize }
+    { cells = Array.repeat (gridSize * gridSize) Nothing, size = gridSize }
 
 
 {-| Just a grid position. We are viewing our hex grid as a tilted square, so we
@@ -200,9 +203,77 @@ getNeighbours gridSize position =
             |> List.map (wrapPosition gridSize)
 
 
-connectedComponent : Position -> Board a -> List Position
-connectedComponent pos board =
-    []
+positionFilter : Board a -> a -> Position -> Maybe Position
+positionFilter board val pos =
+    case boardGetAt board pos of
+        Just newVal ->
+            if newVal == val then
+                Just pos
+            else
+                Nothing
+
+        Nothing ->
+            Nothing
+
+
+componentNeighbourhood : Board a -> Position -> List Position
+componentNeighbourhood board pos =
+    case boardGetAt board pos of
+        Just val ->
+            getNeighbours board.size pos
+                |> List.filterMap (positionFilter board val)
+
+        Nothing ->
+            []
+
+
+{-| Find a single connected component from a given start position, ignoring
+positions already visited. In the event of a start position off the board
+it will silently return an empty list.
+-}
+connectedComponent : Set Position -> Board a -> Position -> ( Set Position, List Position )
+connectedComponent visited board =
+    GraphSearch.dfs
+        visited
+        (componentNeighbourhood board)
+
+
+componentFold : Board Player -> Position -> ( Set Position, List (List Position) ) -> ( Set Position, List (List Position) )
+componentFold board pos ( visited, components ) =
+    let
+        ( newvis, comp ) =
+            connectedComponent visited board pos
+    in
+        ( newvis, comp :: components )
+
+
+splitIndex : Player -> ( Int, Int ) -> Int
+splitIndex player =
+    case player of
+        Player1 ->
+            first
+
+        Player2 ->
+            second
+
+
+{-| Check if a list of positions should win. If so return their value, otherwise
+Nothing
+-}
+winningComponent : Board Player -> List Position -> Maybe Player
+winningComponent board pos =
+    let
+        val =
+            (Maybe.andThen <| boardGetAt board) <| List.head pos
+
+        winning player =
+            List.map (unwrapPosition board.size) pos
+                |> List.map (splitIndex player)
+                |> List.foldl (\i ( a, b ) -> ( a || i == 0, b || i == (board.size - 1) ))
+                    ( False, False )
+                |> (\pair -> (first pair) && (second pair))
+    in
+        ME.filter winning val
 
 
 {-| Checks if a game is over. If it is returns Just the winner, otherwise
@@ -215,7 +286,12 @@ Nothing. The algorithm for this is pretty simple:
 -}
 winner : GameState -> Maybe Player
 winner game =
-    Nothing
+    List.range 0 (game.board.size * game.board.size)
+        |> List.filter (isJust << boardGetAt game.board)
+        |> List.foldl (componentFold game.board) ( Set.empty, [] )
+        |> second
+        |> List.filterMap (winningComponent game.board)
+        |> List.head
 
 
 {-| Make a move on a board. This is the highest level function that we expect
