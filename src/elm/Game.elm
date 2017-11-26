@@ -231,14 +231,22 @@ componentNeighbourhood board pos =
 positions already visited. In the event of a start position off the board
 it will silently return an empty list.
 -}
-connectedComponent : Set Position -> Board a -> Position -> ( Set Position, List Position )
+connectedComponent :
+    Set Position
+    -> Board a
+    -> Position
+    -> ( Set Position, List Position )
 connectedComponent visited board =
     GraphSearch.dfs
         visited
         (componentNeighbourhood board)
 
 
-componentFold : Board Player -> Position -> ( Set Position, List (List Position) ) -> ( Set Position, List (List Position) )
+componentFold :
+    Board Player
+    -> Position
+    -> ( Set Position, List (List Position) )
+    -> ( Set Position, List (List Position) )
 componentFold board pos ( visited, components ) =
     let
         ( newvis, comp ) =
@@ -262,8 +270,8 @@ splitIndex player =
             second
 
 
-{-| Check if a list of positions should win. If so return their value, otherwise
-Nothing
+{-| Check if a list of positions should win. If so return their value,
+otherwise Nothing
 -}
 winningComponent : Board Player -> List Position -> Maybe Player
 winningComponent board pos =
@@ -274,7 +282,8 @@ winningComponent board pos =
         winning player =
             List.map (unwrapPosition board.size) pos
                 |> List.map (splitIndex player)
-                |> List.foldl (\i ( a, b ) -> ( a || i == 0, b || i == (board.size - 1) ))
+                |> List.foldl
+                    (\i ( a, b ) -> ( a || i == 0, b || i == (board.size - 1) ))
                     ( False, False )
                 |> (\pair -> (first pair) && (second pair))
     in
@@ -305,6 +314,10 @@ to be called by the main controller when stuff happens.
 move : GameState -> Int -> GameState
 move state pos =
     { state
-        | board = Maybe.withDefault state.board << placeStone state.nextTurn pos <| state.board
+        | board =
+            Maybe.withDefault state.board
+                << placeStone state.nextTurn pos
+            <|
+                state.board
         , nextTurn = otherPlayer state.nextTurn
     }
