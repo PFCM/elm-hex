@@ -33,7 +33,12 @@ svgHexagon : number -> number -> msg -> String -> Svg msg
 svgHexagon x y clickVal cls =
     polygon
         [ points << String.join " " << List.map formatPoint <| hexagonPoints
-        , transform <| "translate(" ++ toString x ++ "," ++ toString y ++ "),scale(1)"
+        , transform <|
+            "translate("
+                ++ toString x
+                ++ ","
+                ++ toString y
+                ++ "),scale(1)"
         , class cls
         , onClick clickVal
         ]
