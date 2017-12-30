@@ -23,7 +23,7 @@ import Html exposing (..)
 import Game exposing (Player)
 
 
-{-| The human agent only needs to keep track og which player it is so that it
+{-| The human agent only needs to keep track of which player it is so that it
 can draw things in the right colour.
 -}
 type alias HumanState =
@@ -36,7 +36,7 @@ type alias HumanState =
 -}
 
 
-{-| THe stuff we see
+{-| The stuff we see
 -}
 view : HumanState -> Html msg
 view state =
