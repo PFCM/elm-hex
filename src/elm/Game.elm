@@ -85,8 +85,7 @@ emptyBoard gridSize =
     { cells = Array.repeat (gridSize * gridSize) Nothing, size = gridSize }
 
 
-{-| Just a grid position. We are viewing our hex grid as a tilted square, so we
-are using 2D coordinates.
+{-| Just a grid position
 -}
 type alias Position =
     Int

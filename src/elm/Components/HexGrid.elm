@@ -1,7 +1,6 @@
 module Components.HexGrid exposing (..)
 
 import Html exposing (..)
-import Html.Attributes
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Events exposing (onClick)

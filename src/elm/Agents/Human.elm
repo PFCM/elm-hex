@@ -23,11 +23,10 @@ import Html exposing (..)
 import Game exposing (Player)
 
 
-{-| The human agent only needs to keep track of which player it is so that it
-can draw things in the right colour.
+{-| The human agent doesn't keep any state, it just has to wait.
 -}
 type alias HumanState =
-    { player : Player }
+    ()
 
 
 
